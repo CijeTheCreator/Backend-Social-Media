@@ -6,6 +6,8 @@ const userRouter = require("./routes/user");
 const postRouter = require("./routes/post");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const multer = require("multer");
+const path = require("path");
 
 dotenv.config();
 const app = express();
@@ -15,6 +17,15 @@ mongoose.connect(MONGO_URL, {
   useUnifiedTopology: true,
 });
 
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname + Date.now() + ".jpg");
+  },
+});
+const upload = multer({ storage: storage });
 app.use((req, res, next) => {
   // res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -26,10 +37,18 @@ app.use((req, res, next) => {
   );
   next();
 });
+app.use("/assets", express.static(path.join(__dirname, "/public/assets/")));
 app.use(morgan("common"));
 app.use(helmet());
 app.use(express.json());
 app.use("/v1/api/", auth);
+app.post("/v1/api/upload", upload.single("file"), (req, res) => {
+  try {
+    return res.status(200).send("Uploaded");
+  } catch (error) {
+    res.send("Error");
+  }
+});
 app.use("/v1/api/users/", userRouter);
 app.use("/v1/api/posts/", postRouter);
 

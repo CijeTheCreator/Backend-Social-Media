@@ -7,25 +7,18 @@ const router = express.Router();
 
 //Create Post
 router.post("/createPost/:id", (req, res) => {
-  if (req.body.id === req.params.id) {
-    const post = new Post({
-      postee: req.body.id,
-      description: req.body.description,
-    });
-    post.save((err, doc) => {
-      if (err) {
-        res.status(500).send("This Post Couldn't be created");
-      } else {
-        res.status(200).json(doc);
-      }
-    });
-  } else {
-    res
-      .status(500)
-      .send(
-        "You cannot create post as this user as you are not logged in as the user"
-      );
-  }
+  const post = new Post({
+    postee: req.body.id,
+    description: req.body.description,
+    image: req.body.image,
+  });
+  post.save((err, doc) => {
+    if (err) {
+      res.status(500).send("This Post Couldn't be created");
+    } else {
+      res.status(200).json(doc);
+    }
+  });
 });
 
 //Delete Post
